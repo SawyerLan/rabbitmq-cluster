@@ -1,0 +1,47 @@
+---
+- name: generate .erlang.cookie
+  shell: echo "{{ ansible_play_batch[0] }}"| base64
+  register: cookie
+  changed_when: false
+
+- name: backup old erlang cookie
+  become: true
+  shell: cp -a /var/lib/rabbitmq/.erlang.cookie /var/lib/rabbitmq/.erlang.cookie.old
+  changed_when: false
+
+- name: check if erlang cookie changed and if it is so stopping server
+  become: true
+  copy:
+    content: "{{ cookie['stdout'] }}"
+    #content: "cookie"
+    dest: /var/lib/rabbitmq/.erlang.cookie.old
+    mode: 0400
+    owner: rabbitmq
+    group: rabbitmq
+  notify:
+    stop rabbitmq-server
+
+- meta: flush_handlers
+
+- name: updating rabbitmq erlang cookie
+  become: true
+  copy:
+    content: "{{ cookie['stdout'] }}"
+    #content: "cookie"
+    dest: /var/lib/rabbitmq/.erlang.cookie
+    mode: 0400
+    owner: rabbitmq
+    group: rabbitmq
+  notify:
+    start rabbitmq-server
+
+- name: remove old erlang cookie
+  file:
+    path: /var/lib/rabbitmq/.erlang.cookie.old
+    state: absent
+  changed_when: false
+
+- name: start rabbitmq server
+  service:
+    name: rabbitmq-server
+    state: started

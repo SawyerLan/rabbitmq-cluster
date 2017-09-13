@@ -1,0 +1,16 @@
+---
+galaxy_info: 
+  author: lanxiong
+  description: An ansible role for RabbitMQ cluster
+  company: Gomo
+  license: LGPL
+  platforms: 
+    - name: EL
+      version: 
+        - all
+  galaxy_tags: 
+    - Rabbitmq Cluster
+
+dependencies: []
+
+

@@ -1,0 +1,16 @@
+---
+  - name: Fetch VPN logs
+    hosts: rabbitmq
+    tasks:
+      - name: when stop failed then kill -9
+        shell: ps aux|grep rabbitmqtest|grep -v grep|awk '{print $2}'
+        #register: pids
+
+      - name: test
+        debug:
+          msg: "{{ pids|default('fuck null') }}"
+
+      - name: if rabbitmq running then stop it
+        service: name=rabbitmq-server state=stopped
+
+

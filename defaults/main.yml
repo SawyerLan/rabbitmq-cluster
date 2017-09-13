@@ -1,0 +1,24 @@
+---
+
+# logrotate
+rabbitmq_logrotate_period: daily
+rabbitmq_logrotate_amount: 3
+
+rabbitmq_ulimit_open_files: 10000
+
+rabbitmq_plugins:
+  - rabbitmq_management
+
+rabbitmq_use_longname: 'true'
+
+rabbitmq_users_removed:
+  - guest
+
+rabbitmq_users:
+  - user: admin
+    password: admin
+    vhost: /
+    configure_priv: .*
+    read_priv: .*
+    write_priv: .*
+    tags: administrator

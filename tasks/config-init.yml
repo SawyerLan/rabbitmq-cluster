@@ -1,0 +1,40 @@
+---
+- name: if rabbitmq running then stop it
+  service: name=rabbitmq-server state=stopped
+  register: res
+
+- meta: flush_handlers
+
+- name: when stop failed then kill -9
+  shell: ps aux|grep rabbitmq|grep -v grep|awk '{print $2}' |xargs kill -9
+  when: res|failed
+
+- name: rabbitmq default file
+  template:
+    src: etc/default/rabbitmq-server.j2
+    dest: /etc/default/rabbitmq-server
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    restart rabbitmq-server
+
+- name: default settings for RabbitMQ AMQP server
+  template:
+    src: etc/rabbitmq/rabbitmq-env.conf.j2
+    dest: /etc/rabbitmq/rabbitmq-env.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    restart rabbitmq-server
+
+
+- name: enable the plugin is installed
+  rabbitmq_plugin:
+    names: "{{ item }}"
+    state: enabled
+    new_only: yes
+  with_items: "{{ rabbitmq_plugins }}"
+  notify:
+    restart rabbitmq-server

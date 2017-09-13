@@ -1,0 +1,29 @@
+---
+
+- include: packages.yml
+  become: yes
+  tags: packages
+
+- include: config-hosts.yml
+  become: yes
+  tags: hosts
+
+- include: config-init.yml
+  become: yes
+  tags: config-rabbitmq
+
+- include: config-cookie.yml
+  become: yes
+  tags: config-cookie
+
+- include: service.yml
+  become: yes
+
+- include: cluster.yml
+  become: yes
+  tags: config rabbitmq cluster
+  when: ansible_hostname != hostvars[ansible_play_batch[0]].ansible_hostname
+
+- include: user-vhost.yml
+  become: yes
+  tags: rabbitmq user and vhost

@@ -1,0 +1,21 @@
+---
+- name: start rabbitmq server
+  service:
+    name: rabbitmq-server
+    state: started
+
+- name: stop rabbitmq app
+  shell: rabbitmqctl stop_app
+
+- name: add this node to cluster
+  shell: rabbitmqctl join_cluster rabbit@{{ ansible_play_batch[0] }}
+  register: join_cluster_output
+  ignore_errors: True
+  when: ansible_hostname != hostvars[ansible_play_batch[0]].ansible_hostname 
+
+- name: skip fail if the node is already a member of the cluster
+  fail: msg="join_cluster failed but node is not already a member"
+  when: ("'already_member' not in join_cluster_output.stderr") and (join_cluster_output.rc != 0)
+
+- name: start rabbimtq app
+  shell: rabbitmqctl start_app
